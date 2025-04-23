@@ -30,13 +30,16 @@ export function capturarDadosFormulario() {
  * @param {Object} ponto - Objeto com os horários de entrada, intervalo, etc.
  * @returns {Object} Objeto com as durações calculadas
  */
+const DURACAO_SEGUNDA_QUINTA = 450; // 7h30 em minutos
+const DURACAO_SEXTA_FIM_DE_SEMANA = 420; // 7h em minutos
+
 export function calcularDuracoes(ponto) {
   const duracaoTotal = calcularDuracao(ponto.entrada, ponto.saidaFinal);
   const duracaoIntervalo = calcularDuracao(ponto.saidaIntervalo, ponto.voltaIntervalo);
+  const duracaoEsperada = obterDuracaoEsperada(ponto.entrada);
 
-  // Considerando as horas extras e noturnas como exemplo
-  const duracaoNoturna = 0; // A lógica para hora noturna pode ser implementada aqui
-  const duracaoExtras = Math.max(0, duracaoTotal - 480); // 480 minutos = 8h (exemplo)
+  const duracaoNoturna = 0; // Implementar lógica para hora noturna, se necessário
+  const duracaoExtras = Math.max(0, duracaoTotal - duracaoEsperada);
 
   return {
     duracaoTotal,
@@ -44,3 +47,11 @@ export function calcularDuracoes(ponto) {
     duracaoExtras
   };
 }
+
+function obterDuracaoEsperada(entrada) {
+  const diaSemana = new Date(entrada).getDay();
+  return (diaSemana === 5 || diaSemana === 6) 
+    ? DURACAO_SEXTA_FIM_DE_SEMANA 
+    : DURACAO_SEGUNDA_QUINTA;
+}
+
