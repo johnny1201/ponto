@@ -180,6 +180,8 @@ document.getElementById('fileInput').addEventListener('change', handleFileSelect
 
 function handleFileSelect(event) {
   const file = event.target.files[0];
+  console.log("Arquivo selecionado:", file); // Log do arquivo selecionado
+
   if (!isValidFile(file)) {
     alert('Por favor, selecione um arquivo .xlsx válido');
     return;
@@ -195,17 +197,20 @@ function isValidFile(file) {
 }
 
 function processFile(fileData) {
-  try {
-    const workbook = XLSX.read(fileData, { type: 'binary' });
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-
-    const registros = rows.slice(1).map((row, index) => processRow(row, index + 2)).filter(Boolean);
-    atualizarTabela(registros);
-  } catch (error) {
-    handleError(error, 'Erro ao processar o arquivo XLSX');
+    console.log("Arquivo carregado:", fileData); // Log do conteúdo do arquivo
+    try {
+      const workbook = XLSX.read(fileData, { type: 'binary' });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+      console.log("Linhas extraídas:", rows); // Verifica as linhas extraídas
+  
+      const registros = rows.slice(1).map((row, index) => processRow(row, index + 2)).filter(Boolean);
+      atualizarTabela(registros);
+    } catch (error) {
+      handleError(error, 'Erro ao processar o arquivo XLSX');
+    }
   }
-}
+  
 
 function processRow(row, rowIndex) {
   try {
