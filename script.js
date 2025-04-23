@@ -209,9 +209,8 @@ function processFile(fileData) {
     } catch (error) {
       handleError(error, 'Erro ao processar o arquivo XLSX');
     }
-  }
+}
   
-
 function processRow(row, rowIndex) {
   try {
     const [dataRef, entrada, saidaIntervalo, voltaIntervalo, saida] = row;
