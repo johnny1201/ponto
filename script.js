@@ -20,10 +20,11 @@ document.getElementById('form-ponto').addEventListener('submit', function (e) {
     saida: new Date(saidaFinal)
   };
 
-  // Calcular total de horas trabalhadas (sem noturno ainda)
+  // Calcular total de horas trabalhadas, noturnas e extras
   const totalTrabalhado = calcularTotalHoras(registro);
   registro.total = totalTrabalhado;
   registro.noturno = calcularHorasNoturnas(registro);
+  registro.extra = calcularHorasExtras(registro.entrada, registro.total);
 
   // Adicionar ao array
   registros.push(registro);
@@ -120,3 +121,56 @@ function calcularHorasNoturnas({ entrada, saidaIntervalo, voltaIntervalo, saida 
     return minutosNoturnos;
   }
   
+  document.getElementById('exportarPdf').addEventListener('click', function () {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+  
+    let y = 10;
+    doc.text('Folha de Ponto', 10, y);
+    y += 10;
+  
+    registros.forEach(reg => {
+      doc.text(`Data: ${reg.data} | Entrada: ${reg.entrada.toLocaleString('pt-BR')} | Saída Intervalo: ${reg.saidaIntervalo.toLocaleString('pt-BR')} | Volta Intervalo: ${reg.voltaIntervalo.toLocaleString('pt-BR')} | Saída: ${reg.saida.toLocaleString('pt-BR')} | Total: ${reg.total} | Noturno: ${reg.noturno}`, 10, y);
+      y += 10;
+    });
+  
+    doc.save('folha_ponto.pdf');
+  });
+  
+  function ehFimDeSemana(data) {
+    const dia = data.getDay(); // 0 = Domingo, 6 = Sábado
+    return dia === 0 || dia === 6;
+  }
+  
+  function calcularHorasExtras(entrada, total) {
+    const [h, m] = total.split(':').map(Number);
+    const minutosTotais = h * 60 + m;
+  
+    const jornadaPadraoMin = ehFimDeSemana(entrada) ? 7 * 60 : 7 * 60 + 30;
+  
+    if (minutosTotais > jornadaPadraoMin) {
+      return msParaHoraMinuto((minutosTotais - jornadaPadraoMin) * 60000);
+    } else {
+      return '00:00';
+    }
+  }
+  
+  // Salvar após adicionar
+localStorage.setItem('registrosPonto', JSON.stringify(registros));
+
+// Carregar ao iniciar
+window.addEventListener('DOMContentLoaded', () => {
+  const dados = localStorage.getItem('registrosPonto');
+  if (dados) {
+    const carregados = JSON.parse(dados);
+    carregados.forEach(reg => {
+      // Reconstruir objetos Date
+      reg.entrada = new Date(reg.entrada);
+      reg.saidaIntervalo = new Date(reg.saidaIntervalo);
+      reg.voltaIntervalo = new Date(reg.voltaIntervalo);
+      reg.saida = new Date(reg.saida);
+      registros.push(reg);
+    });
+    atualizarTabela();
+  }
+});
