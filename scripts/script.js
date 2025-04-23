@@ -95,4 +95,4 @@ async function handleFileUpload(event) {
 }
 
 // Configuração do evento de upload
-document.getElementById('upload').addEventListener('change', handleFileUpload);
+document.getElementById('fileInput').addEventListener('change', handleFileUpload);
