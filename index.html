@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Controle de Ponto</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    form, table {
+      width: 100%;
+      margin-bottom: 30px;
+    }
+
+    input, button {
+      padding: 5px;
+      margin: 5px 0;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+    }
+
+    .export-buttons {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Controle de Ponto</h1>
+
+  <!-- Formulário de entrada manual -->
+  <form id="form-ponto">
+    <h2>Cadastro Manual</h2>
+    <label>Data de referência: <input type="date" id="dataRef" required /></label><br>
+    <label>Entrada: <input type="datetime-local" id="entrada" required /></label><br>
+    <label>Saída para intervalo: <input type="datetime-local" id="saidaIntervalo" required /></label><br>
+    <label>Volta do intervalo: <input type="datetime-local" id="voltaIntervalo" required /></label><br>
+    <label>Saída final: <input type="datetime-local" id="saidaFinal" required /></label><br>
+    <button type="submit">Adicionar Ponto</button>
+  </form>
+
+  <!-- Upload de planilha XLSX -->
+  <div>
+    <h2>Importar Planilha</h2>
+    <input type="file" id="fileInput" accept=".xlsx" />
+  </div>
+
+  <!-- Tabela de pontos -->
+  <h2>Folha de Ponto</h2>
+  <table id="tabelaPonto">
+    <thead>
+      <tr>
+        <th>Data</th>
+        <th>Entrada</th>
+        <th>Saída Intervalo</th>
+        <th>Volta Intervalo</th>
+        <th>Saída</th>
+        <th>Total</th>
+        <th>Total Noturno</th>
+        <th>Extra</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Dados inseridos via JS -->
+    </tbody>
+    <tfoot>
+      <tr>
+        <th colspan="5">Totais</th>
+        <th id="totalHoras">00:00</th>
+        <th id="totalNoturno">00:00</th>
+        <th id="totalExtras">00:00</th>
+      </tr>
+    </tfoot>
+  </table>
+
+  <!-- Botões de exportação -->
+  <div class="export-buttons">
+    <button id="exportPdf">Exportar PDF</button>
+    <button id="exportXlsx">Exportar XLSX</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
