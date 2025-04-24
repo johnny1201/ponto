@@ -1,5 +1,12 @@
 // pontoController.js
-import { calcularDuracao } from "../utils/timeUtils.js";
+import {
+  calcularDuracao,
+  calcularHoraNoturna,
+  converterHorasParaMinutos
+} from "../utils/timeUtils.js";
+
+const DURACAO_SEGUNDA_QUINTA = 450; // 7h30 em minutos
+const DURACAO_SEXTA_FIM_DE_SEMANA = 420; // 7h em minutos
 
 /**
  * Captura os dados do formulário e retorna um objeto com as informações.
@@ -30,15 +37,18 @@ export function capturarDadosFormulario() {
  * @param {Object} ponto - Objeto com os horários de entrada, intervalo, etc.
  * @returns {Object} Objeto com as durações calculadas
  */
-const DURACAO_SEGUNDA_QUINTA = 450; // 7h30 em minutos
-const DURACAO_SEXTA_FIM_DE_SEMANA = 420; // 7h em minutos
-
 export function calcularDuracoes(ponto) {
-  const duracaoTotal = calcularDuracao(ponto.entrada, ponto.saidaFinal);
-  const duracaoIntervalo = calcularDuracao(ponto.saidaIntervalo, ponto.voltaIntervalo);
-  const duracaoEsperada = obterDuracaoEsperada(ponto.entrada);
+  const entrada = converterHorasParaMinutos(ponto.entrada);
+  const saidaIntervalo = converterHorasParaMinutos(ponto.saidaIntervalo);
+  const voltaIntervalo = converterHorasParaMinutos(ponto.voltaIntervalo);
+  const saidaFinal = converterHorasParaMinutos(ponto.saidaFinal);
 
-  const duracaoNoturna = 0; // Implementar lógica para hora noturna, se necessário
+  const duracaoTrabalho = saidaFinal - entrada;
+  const duracaoIntervalo = voltaIntervalo - saidaIntervalo;
+  const duracaoTotal = duracaoTrabalho - duracaoIntervalo;
+
+  const duracaoNoturna = calcularHoraNoturna(entrada, saidaFinal, saidaIntervalo, voltaIntervalo);
+  const duracaoEsperada = obterDuracaoEsperada(ponto.dataRef);
   const duracaoExtras = Math.max(0, duracaoTotal - duracaoEsperada);
 
   return {
@@ -48,10 +58,9 @@ export function calcularDuracoes(ponto) {
   };
 }
 
-function obterDuracaoEsperada(entrada) {
-  const diaSemana = new Date(entrada).getDay();
-  return (diaSemana === 5 || diaSemana === 6) 
-    ? DURACAO_SEXTA_FIM_DE_SEMANA 
+function obterDuracaoEsperada(data) {
+  const diaSemana = new Date(data).getDay(); // 0 = domingo, 6 = sábado
+  return (diaSemana === 5 || diaSemana === 6)
+    ? DURACAO_SEXTA_FIM_DE_SEMANA
     : DURACAO_SEGUNDA_QUINTA;
 }
-
