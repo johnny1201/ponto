@@ -1,4 +1,3 @@
-import * as XLSX from 'xlsx';
 import { converterParaISO, extrairDataISO } from './timeUtils.js';
 
 /**
@@ -56,5 +55,4 @@ export async function processarArquivo(arquivo) {
     } catch (error) {
       throw new Error('Erro ao processar o arquivo.');
     }
-  }
-  
+}

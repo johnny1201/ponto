@@ -12,8 +12,9 @@ const DURACAO_SEXTA_FIM_DE_SEMANA = 420; // 7h em minutos
  * @returns {Object|null} Objeto com os dados ou null se houver erro
  */
 export function capturarDadosFormulario() {
-  const dataRef = document.getElementById("dataRef").value; // formato: yyyy-mm-dd
-  const entrada = document.getElementById("entrada").value; // hh:mm
+  const dataRef = document.getElementById("dataRef").value;
+
+  const entrada = document.getElementById("entrada").value;           // já vem YYYY-MM-DDTHH:MM
   const saidaIntervalo = document.getElementById("saidaIntervalo").value;
   const voltaIntervalo = document.getElementById("voltaIntervalo").value;
   const saidaFinal = document.getElementById("saidaFinal").value;
@@ -22,18 +23,12 @@ export function capturarDadosFormulario() {
     return null;
   }
 
-  // Adiciona a data aos horários
-  const entradaFull = `${dataRef}T${entrada}`;
-  const saidaIntervaloFull = `${dataRef}T${saidaIntervalo}`;
-  const voltaIntervaloFull = `${dataRef}T${voltaIntervalo}`;
-  const saidaFinalFull = `${dataRef}T${saidaFinal}`;
-
   return {
     dataRef,
-    entrada: entradaFull,
-    saidaIntervalo: saidaIntervaloFull,
-    voltaIntervalo: voltaIntervaloFull,
-    saidaFinal: saidaFinalFull
+    entrada,
+    saidaIntervalo,
+    voltaIntervalo,
+    saidaFinal
   };
 }
 

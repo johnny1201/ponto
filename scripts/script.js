@@ -1,12 +1,7 @@
 // script.js
 import { capturarDadosFormulario, calcularDuracoes } from "./controllers/pontoController.js";
 import { adicionarLinhaTabela, atualizarTotais } from "./controllers/tabelaController.js";
-import {
-  transformarLinhaParaPonto,
-  validarArquivoXlsx,
-  lerArquivoXlsx,
-  processarArquivo
-} from "./utils/xlsxUtils.js";
+import { processarArquivo } from "./utils/xlsxUtils.js";  // Remova as importações não utilizadas
 
 // Variáveis globais para armazenar totais
 let totais = {
@@ -45,21 +40,20 @@ document.getElementById("form-ponto").addEventListener("submit", function(event)
  * @param {Object[]} dados - Array de objetos contendo os dados do ponto.
  */
 function preencherTabelaComDados(dados) {
-  const tbody = document.querySelector('#tabela tbody');
-  tbody.innerHTML = '';  // Limpar a tabela existente
-
   dados.forEach((ponto) => {
-    const novaLinha = document.createElement('tr');
-    
-    Object.values(ponto).forEach((valor) => {
-      const td = document.createElement('td');
-      td.textContent = valor;
-      novaLinha.appendChild(td);
-    });
+    const duracoes = calcularDuracoes(ponto);
+    adicionarLinhaTabela(ponto, duracoes);
 
-    tbody.appendChild(novaLinha);
+    // Atualizando os totais após a adição de cada linha
+    totais.totalHoras += duracoes.duracaoTotal;
+    totais.totalNoturno += duracoes.duracaoNoturna;
+    totais.totalExtras += duracoes.duracaoExtras;
   });
+
+  // Atualizando os totais da tabela após a importação
+  atualizarTotais(totais);
 }
+
 
 /**
  * Função de callback para lidar com o upload do arquivo XLSX.
@@ -69,13 +63,13 @@ function preencherTabelaComDados(dados) {
 async function handleFileUpload(event) {
   const arquivo = event.target.files[0];
 
-  if (!validarArquivoXlsx(arquivo)) {
+  if (!arquivo || !arquivo.name.endsWith('.xlsx')) {
       alert('Por favor, envie um arquivo XLSX válido!');
       return;
   }
 
   try {
-      const dados = await processarArquivo(arquivo);
+      const dados = await processarArquivo(arquivo);  // A função processa e retorna os dados
       preencherTabelaComDados(dados);
   } catch (error) {
       alert(error.message || 'Erro ao processar o arquivo. Tente novamente.');
@@ -85,3 +79,18 @@ async function handleFileUpload(event) {
 
 // Configuração do evento de upload
 document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+
+// script.js
+document.getElementById('exportarXlsx').addEventListener('click', () => {
+  const ws = XLSX.utils.table_to_sheet(document.getElementById('tabelaPonto'));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Ponto");
+  XLSX.writeFile(wb, 'folha_de_ponto.xlsx');
+});
+
+// script.js
+document.getElementById('exportarPdf').addEventListener('click', () => {
+  const doc = new jsPDF();
+  doc.autoTable({ html: '#tabelaPonto' });
+  doc.save('folha_de_ponto.pdf');
+});

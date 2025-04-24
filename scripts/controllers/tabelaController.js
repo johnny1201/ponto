@@ -4,21 +4,30 @@ import { converterMinutosParaHoras } from "../utils/timeUtils.js";
 /**
  * Adiciona uma nova linha à tabela com os dados do ponto.
  * @param {Object} ponto - Objeto com os dados do ponto
- * @param {Object} duracoes - Objeto com as durações calculadas
+ * @param {Object} duracoes - Objeto com as durações calculadas (total, noturno, extra)
  */
 export function adicionarLinhaTabela(ponto, duracoes) {
-  const tabelaPonto = document.getElementById("tabelaPonto").getElementsByTagName("tbody")[0];
-  
-  const novaLinha = tabelaPonto.insertRow();
-  
-  novaLinha.insertCell(0).textContent = ponto.dataRef;
-  novaLinha.insertCell(1).textContent = ponto.entrada;
-  novaLinha.insertCell(2).textContent = ponto.saidaIntervalo;
-  novaLinha.insertCell(3).textContent = ponto.voltaIntervalo;
-  novaLinha.insertCell(4).textContent = ponto.saidaFinal;
-  novaLinha.insertCell(5).textContent = converterMinutosParaHoras(duracoes.duracaoTotal);
-  novaLinha.insertCell(6).textContent = converterMinutosParaHoras(duracoes.duracaoNoturna);
-  novaLinha.insertCell(7).textContent = converterMinutosParaHoras(duracoes.duracaoExtras);
+  const tbody = document.querySelector('#tabelaPonto tbody');
+  const novaLinha = document.createElement('tr');
+
+  const dadosPonto = [
+    ponto.dataRef,
+    ponto.entrada,
+    ponto.saidaIntervalo,
+    ponto.voltaIntervalo,
+    ponto.saidaFinal,
+    converterMinutosParaHoras(duracoes.duracaoTotal),
+    converterMinutosParaHoras(duracoes.duracaoNoturna),
+    converterMinutosParaHoras(duracoes.duracaoExtras)
+  ];
+
+  dadosPonto.forEach((valor) => {
+    const td = document.createElement('td');
+    td.textContent = valor;
+    novaLinha.appendChild(td);
+  });
+
+  tbody.appendChild(novaLinha);
 }
 
 /**
@@ -26,7 +35,12 @@ export function adicionarLinhaTabela(ponto, duracoes) {
  * @param {Object} totais - Objeto com totais de horas, extras e noturnas
  */
 export function atualizarTotais(totais) {
-  document.getElementById("totalHoras").textContent = converterMinutosParaHoras(totais.totalHoras);
-  document.getElementById("totalNoturno").textContent = converterMinutosParaHoras(totais.totalNoturno);
-  document.getElementById("totalExtras").textContent = converterMinutosParaHoras(totais.totalExtras);
+  const totalHoras = document.getElementById("totalHoras");
+  const totalNoturno = document.getElementById("totalNoturno");
+  const totalExtras = document.getElementById("totalExtras");
+
+  totalHoras.textContent = converterMinutosParaHoras(totais.totalHoras);
+  totalNoturno.textContent = converterMinutosParaHoras(totais.totalNoturno);
+  totalExtras.textContent = converterMinutosParaHoras(totais.totalExtras);
 }
+
