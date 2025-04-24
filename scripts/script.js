@@ -1,6 +1,12 @@
 // script.js
 import { capturarDadosFormulario, calcularDuracoes } from "./controllers/pontoController.js";
 import { adicionarLinhaTabela, atualizarTotais } from "./controllers/tabelaController.js";
+import {
+  transformarLinhaParaPonto,
+  validarArquivoXlsx,
+  lerArquivoXlsx,
+  processarArquivo
+} from "./utils/xlsxUtils.js";
 
 // Variáveis globais para armazenar totais
 let totais = {
@@ -9,7 +15,12 @@ let totais = {
   totalExtras: 0
 };
 
-// Manipulador de envio do formulário
+/**
+ * Manipulador do envio do formulário de ponto.
+ * Captura os dados do formulário, calcula as durações e adiciona uma nova linha à tabela.
+ * Atualiza os totais acumulados de horas, horas noturnas e horas extras.
+ * @param {Event} event - O evento de envio do formulário.
+ */
 document.getElementById("form-ponto").addEventListener("submit", function(event) {
   event.preventDefault();
 
@@ -29,54 +40,32 @@ document.getElementById("form-ponto").addEventListener("submit", function(event)
   atualizarTotais(totais);
 });
 
-// Função para validar se o arquivo é válido e é do tipo XLSX
-function validarArquivoXlsx(arquivo) {
-  return arquivo && arquivo.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-}
-
-// Função para processar o conteúdo do arquivo e extrair os dados
-async function processarArquivo(arquivo) {
-  try {
-    const workbook = await lerArquivoXlsx(arquivo);
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const dados = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-    return dados;
-  } catch (error) {
-    throw new Error('Erro ao processar o arquivo.');
-  }
-}
-
-// Função para ler o arquivo XLSX e retornar um objeto de planilha
-function lerArquivoXlsx(arquivo) {
-  return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-          const data = e.target.result;
-          const workbook = XLSX.read(data, { type: 'binary' });
-          resolve(workbook);
-      };
-      reader.onerror = (error) => reject(new Error('Erro ao ler o arquivo.'));
-      reader.readAsBinaryString(arquivo);
-  });
-}
-
-// Função para preencher a tabela com os dados do arquivo
+/**
+ * Preenche a tabela HTML com os dados extraídos do arquivo XLSX.
+ * @param {Object[]} dados - Array de objetos contendo os dados do ponto.
+ */
 function preencherTabelaComDados(dados) {
   const tbody = document.querySelector('#tabela tbody');
   tbody.innerHTML = '';  // Limpar a tabela existente
 
-  dados.forEach((linha) => {
-      const novaLinha = document.createElement('tr');
-      linha.forEach((celula) => {
-          const td = document.createElement('td');
-          td.textContent = celula;
-          novaLinha.appendChild(td);
-      });
-      tbody.appendChild(novaLinha);
+  dados.forEach((ponto) => {
+    const novaLinha = document.createElement('tr');
+    
+    Object.values(ponto).forEach((valor) => {
+      const td = document.createElement('td');
+      td.textContent = valor;
+      novaLinha.appendChild(td);
+    });
+
+    tbody.appendChild(novaLinha);
   });
 }
 
-// Função de callback para lidar com o upload do arquivo
+/**
+ * Função de callback para lidar com o upload do arquivo XLSX.
+ * Valida o arquivo, processa seu conteúdo e preenche a tabela com os dados extraídos.
+ * @param {Event} event - O evento de mudança no input de arquivo.
+ */
 async function handleFileUpload(event) {
   const arquivo = event.target.files[0];
 
